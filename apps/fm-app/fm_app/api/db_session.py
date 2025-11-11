@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session, sessionmaker
 from trino.auth import BasicAuthentication
+import logging
 
 
 from fm_app.config import get_settings
@@ -65,6 +66,7 @@ normalized_driver = normalize_database_driver(settings.database_wh_driver)
 WH_URL = f"{normalized_driver}://{settings.database_wh_user}:{settings.database_wh_pass}@{settings.database_wh_server_v2}:{settings.database_wh_port_v2}/{settings.database_wh_db_v2}{settings.database_wh_params_v2}"
 
 if normalized_driver == "trino":
+    logging.info("Starting Trino session")
     wh_engine = create_engine(
         WH_URL,
         echo=True,
@@ -81,6 +83,7 @@ if normalized_driver == "trino":
         },
     )
 else:
+    logging.info(f"Starting {normalized_driver} session")
     wh_engine = create_engine(
         WH_URL,
         pool_size=40,

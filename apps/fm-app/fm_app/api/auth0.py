@@ -63,7 +63,7 @@ class VerifyToken:
                     token.credentials,
                     options={"verify_signature": False, "verify_aud": False}  # don't verify yet
             )
-            LOGGER.info("iss=%s aud=%s sub=%s", 
+            LOGGER.debug("iss=%s aud=%s sub=%s", 
                 unverified_claims.get("iss"),
                 unverified_claims.get("aud"),
                 unverified_claims.get("sub"))
