@@ -1,4 +1,5 @@
 import pathlib
+import logging
 from typing import Any, Dict
 
 import yaml
@@ -132,6 +133,7 @@ def generate_schema_prompt(engine, settings, with_examples=False):
             has_table_description = descriptions.get("tables", {}).get(table, False)
             # with whitelist mode, only tables in the descriptions are included
             if has_whitelist and not has_table_description:
+                logging.info(f"skipping {table}")
                 continue
 
             table_metadata = descriptions.get("tables", {}).get(table, {})
@@ -162,6 +164,8 @@ def generate_schema_prompt(engine, settings, with_examples=False):
                     schema_text += "\n"
 
             schema_text += "\n"
+            logging.info(f"added {table}")
+
 
             # Fetch sample rows
             if not with_examples:

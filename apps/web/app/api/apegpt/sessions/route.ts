@@ -21,6 +21,7 @@ const GET = async (req: NextRequest, res: NextResponse) => {
     const res = await client.GET("/api/v1/session", {
       headers: { Authorization: `Bearer ${token.accessToken}` },
     });
+    // console.log("res", res);
     return NextResponse.json(res.data);
   } catch (error: any) {
     console.log(error);

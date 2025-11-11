@@ -34,14 +34,23 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.13-slim-bookworm
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    iputils-ping \
+    curl \
+    openjdk-17-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -L https://repo1.maven.org/maven2/io/trino/trino-cli/443/trino-cli-443-executable.jar \
+    -o /usr/local/bin/trino \
+    && chmod +x /usr/local/bin/trino
+
 ARG PROJECT_DIR=''
 
 COPY --from=builder --chown=nobody:nogroup /app /app
 
 ENV PACKS_RESOURCES_DIR=/app/packages
-COPY --chown=nobody:nogroup packages/resources/ /app/packages/resources/
-COPY --chown=nobody:nogroup packages/client-configs/ /app/packages/client-configs/
-COPY --chown=nobody:nogroup packages/templates/ /app/packages/templates/
+COPY --chown=nobody:nogroup ${PROJECT_DIR}packages/resources/ /app/packages/resources/
+COPY --chown=nobody:nogroup ${PROJECT_DIR}packages/client-configs/ /app/packages/client-configs/
 
 EXPOSE 8080
 

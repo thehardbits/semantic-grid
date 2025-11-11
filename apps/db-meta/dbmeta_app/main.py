@@ -40,7 +40,7 @@ async def check_mcp(mcp_server: FastMCP):
                 "prompt_items",
                 {
                     "req": {
-                        "user_request": "Count all trades in the warehouse",
+                        "user_request": "Count all radius messages today",
                         "db": "wh_v2",
                     }
                 },

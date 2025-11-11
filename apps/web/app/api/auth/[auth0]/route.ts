@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+
+
 import type { AppRouteHandlerFnContext } from "@auth0/nextjs-auth0";
 import {
   handleAuth,
@@ -42,9 +45,14 @@ const GET = handleAuth({
   callback(req: NextRequest, ctx: AppRouteHandlerFnContext) {
     const { redirectUri } = getUrls(req);
     try {
-      return handleCallback(req, ctx, {
+      // console.log("callback", req.nextUrl.searchParams);
+      // console.log("params", req, ctx, redirectUri);
+      // console.log("params", redirectUri);
+      let result =  handleCallback(req, ctx, {
         redirectUri,
       });
+      // console.log("callback result", result);
+      return result;
     } catch (e: any) {
       console.log("callback error", e);
       return NextResponse.error();

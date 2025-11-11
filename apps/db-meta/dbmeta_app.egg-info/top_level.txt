@@ -1,3 +1,0 @@
-dbmeta_app
-k8s
-tests

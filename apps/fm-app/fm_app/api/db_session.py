@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session, sessionmaker
+from trino.auth import BasicAuthentication
+
 
 from fm_app.config import get_settings
 
@@ -61,13 +63,31 @@ async def get_db() -> AsyncSession:
 # Normalize driver to handle 'postgres' -> 'postgresql' conversion
 normalized_driver = normalize_database_driver(settings.database_wh_driver)
 WH_URL = f"{normalized_driver}://{settings.database_wh_user}:{settings.database_wh_pass}@{settings.database_wh_server_v2}:{settings.database_wh_port_v2}/{settings.database_wh_db_v2}{settings.database_wh_params_v2}"
-wh_engine = create_engine(
-    WH_URL,
-    pool_size=40,
-    max_overflow=60,
-    pool_pre_ping=True,
-    pool_recycle=360,
-)
+
+if normalized_driver == "trino":
+    wh_engine = create_engine(
+        WH_URL,
+        echo=True,
+        pool_size=20,
+        max_overflow=30,
+        pool_pre_ping=True,
+        pool_recycle=360,
+        connect_args={
+            "http_scheme": "https",
+            "verify": False,  # use a CA file path instead in prod, e.g. "/path/to/ca.crt"
+            "auth": BasicAuthentication(
+                settings.database_wh_user, settings.database_wh_pass
+            ),
+        },
+    )
+else:
+    wh_engine = create_engine(
+        WH_URL,
+        pool_size=40,
+        max_overflow=60,
+        pool_pre_ping=True,
+        pool_recycle=360,
+    )
 
 wh_session = sessionmaker(bind=wh_engine, expire_on_commit=False)
 

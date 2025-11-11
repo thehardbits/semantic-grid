@@ -6,6 +6,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, SecurityS
 
 from fm_app.config import get_settings
 
+import logging
+LOGGER = logging.getLogger(__name__)
 
 class UnauthorizedException(HTTPException):
     def __init__(self, detail: str, **kwargs):
@@ -29,6 +31,7 @@ class VerifyToken:
         # This gets the JWKS from a given URL and does processing so you can
         # use any of the keys available
         jwks_url = f"https://{self.config.auth0_domain}/.well-known/jwks.json"
+        # LOGGER.info(f"JWKS_UTL {jwks_url} ");
         self.jwks_client = jwt.PyJWKClient(jwks_url)
 
     async def verify(
@@ -36,7 +39,8 @@ class VerifyToken:
         security_scopes: SecurityScopes,
         token: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer()),
     ):
-        # print("verify user token", token)
+        # LOGGER.info(f"verify user token {token}")
+        # LOGGER.info(f"verify user jwks_client {self.jwks_client}")
         if token is None:
             return None
             # raise UnauthenticatedException
@@ -47,12 +51,22 @@ class VerifyToken:
                 token.credentials
             ).key
         except jwt.exceptions.PyJWKClientError:
+            LOGGER.error("PyJWKClientError error")
             return None
             # raise UnauthorizedException(str(error))
         except jwt.exceptions.DecodeError as error:
+            LOGGER.error(f"Decode error {str(error)}")
             raise UnauthorizedException(str(error))
 
         try:
+            unverified_claims = jwt.decode(
+                    token.credentials,
+                    options={"verify_signature": False, "verify_aud": False}  # don't verify yet
+            )
+            LOGGER.info("iss=%s aud=%s sub=%s", 
+                unverified_claims.get("iss"),
+                unverified_claims.get("aud"),
+                unverified_claims.get("sub"))
             payload = jwt.decode(
                 token.credentials,
                 signing_key,
@@ -60,8 +74,9 @@ class VerifyToken:
                 audience=self.config.auth0_api_audience,
                 issuer=self.config.auth0_issuer,
             )
-        except Exception:
+        except Exception as error:
             # print(error, token.credentials, signing_key)
+            LOGGER.error(f"Payload decode error {str(error)}")
             return None
             # raise UnauthorizedException(str(error))
 
