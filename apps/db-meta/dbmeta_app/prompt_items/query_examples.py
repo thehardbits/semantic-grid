@@ -1,8 +1,11 @@
 from dbmeta_app.api.model import PromptItem, PromptItemType
 from dbmeta_app.vector_db.milvus import QueryExample, get_hits
+import logging
 
 
 def get_query_example_prompt_item(query: str, db: str) -> PromptItem:
+    logging.info("get_query_example_prompt_item")
+
     data = get_hits(query, db)
 
     # Format into a human-readable LLM prompt
@@ -23,6 +26,7 @@ def get_query_example_prompt_item(query: str, db: str) -> PromptItem:
 
     # Combine all examples into a single LLM input string
     llm_prompt = "\n\n".join(formatted_examples)
+    logging.info("get_query_example_prompt_item done")
 
     return PromptItem(
         text=llm_prompt,

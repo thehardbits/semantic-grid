@@ -1,3 +1,4 @@
+import logging
 import pathlib
 from typing import Any, Dict
 
@@ -122,6 +123,7 @@ def generate_schema_prompt(engine, settings, with_examples=False):
 
     with engine.connect() as conn:
         table_names = inspector.get_table_names()
+        logging.info("got table_names", extra={'tables': table_names})
         for idx, table in enumerate(table_names):
             # Skip system/internal tables and temp tables
             if table.startswith("_") or table.startswith("temp_"):
@@ -208,6 +210,7 @@ def generate_schema_prompt(engine, settings, with_examples=False):
 
 
 def get_schema_prompt_item() -> PromptItem:
+    logging.info("get_schema_prompt_item")
     settings = get_settings()
     engine = get_db()
 
@@ -221,6 +224,7 @@ def get_schema_prompt_item() -> PromptItem:
         prompt_item_type=PromptItemType.db_struct,
         score=100_000,
     )
+    logging.info("get_schema_prompt_item done")
     return items
 
 

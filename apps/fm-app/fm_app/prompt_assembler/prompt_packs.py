@@ -14,6 +14,7 @@ import yaml
 from jinja2 import BaseLoader, Environment, StrictUndefined
 from jsonschema import Draft202012Validator, validate
 from jsonschema import exceptions as jsonschema_ex
+import logging
 
 # ---------- Utilities
 
@@ -594,6 +595,7 @@ class PromptAssembler:
             # Debug print removed - caused LogRecord 'name' conflict
             name = need["name"]
             prov = self.async_mcp_registry.get(name)
+            logging.info(f"Need {need}, prov {prov}")
             if not prov:
                 continue  # or raise if strictly required
 
